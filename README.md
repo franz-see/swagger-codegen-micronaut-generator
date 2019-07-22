@@ -30,5 +30,6 @@ java -cp swagger-codegen-micronaut-generator-1.0.0.jar:swagger-codegen-cli-3.0.1
 This will read your swagger/openapi configuration `/path/to/your/swagger.yaml` and generate the project directory in `/where/you/want/the/project/to/be/generated`. 
 
 
-# Technical Note
-This project has been heavily copied from SpringCodegen :) It will grow out of it soon but for now, it's very much a copy of it but changed the spring parts into micronaut :)
+The project it will generate will contain dtos for your API, config files, and the actual Api intefaces themselves. By default, these Api interfaces throw `UnsupportedOperationException`. 
+
+The next step would be to implement those Api interfaces with your `@Controller` classes, and start implementing those methods with actual logic. 
