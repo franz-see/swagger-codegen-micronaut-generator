@@ -26,38 +26,32 @@ import java.util.stream.Collectors;
 import static io.swagger.codegen.v3.CodegenConstants.HAS_ENUMS_EXT_NAME;
 import static io.swagger.codegen.v3.CodegenConstants.IS_ENUM_EXT_NAME;
 import static io.swagger.codegen.v3.generators.handlebars.ExtensionHelper.getBooleanValue;
+import static java.util.Collections.singletonList;
 
 public class MicronautCodegen extends AbstractJavaCodegen implements BeanValidationFeatures, OptionalFeatures {
-    static Logger LOGGER = LoggerFactory.getLogger(MicronautCodegen.class);
-    public static final String TITLE = "title";
-    public static final String CONFIG_PACKAGE = "configPackage";
-    public static final String BASE_PACKAGE = "basePackage";
-    public static final String INTERFACE_ONLY = "interfaceOnly";
-    public static final String DELEGATE_PATTERN = "delegatePattern";
-    public static final String SINGLE_CONTENT_TYPES = "singleContentTypes";
-    public static final String ASYNC = "async";
-    public static final String RESPONSE_WRAPPER = "responseWrapper";
-    public static final String USE_TAGS = "useTags";
-    public static final String IMPLICIT_HEADERS = "implicitHeaders";
-    public static final String SWAGGER_DOCKET_CONFIG = "swaggerDocketConfig";
 
-    protected String title = "swagger-petstore";
-    protected String configPackage = "io.swagger.configuration";
-    protected String basePackage = "io.swagger";
-    protected boolean interfaceOnly = true;
-    protected boolean delegatePattern = false;
-    protected boolean delegateMethod = false;
-    protected boolean singleContentTypes = false;
-    protected boolean async = false;
-    protected String responseWrapper = "";
-    protected boolean useTags = false;
-    protected boolean useBeanValidation = true;
-    protected boolean implicitHeaders = false;
-    protected boolean swaggerDocketConfig = false;
-    protected boolean useOptional = false;
+    private static Logger LOGGER = LoggerFactory.getLogger(MicronautCodegen.class);
+    private static final String TITLE = "title";
+    private static final String CONFIG_PACKAGE = "configPackage";
+    private static final String BASE_PACKAGE = "basePackage";
+    private static final String USE_TAGS = "useTags";
+    private static final String IMPLICIT_HEADERS = "implicitHeaders";
 
+    private String title = "swagger-petstore";
+    private String configPackage = "io.swagger.configuration";
+    private String basePackage = "io.swagger";
+    private boolean useTags = false;
+    private boolean useBeanValidation = true;
+    private boolean implicitHeaders = false;
+    private boolean useOptional = false;
+
+    @SuppressWarnings("unused")
     public MicronautCodegen() {
         super();
+        init();
+    }
+
+    private void init() {
         outputFolder = "generated-code/javaMicronaut";
         apiPackage = "io.swagger.api";
         modelPackage = "io.swagger.model";
@@ -73,15 +67,9 @@ public class MicronautCodegen extends AbstractJavaCodegen implements BeanValidat
         cliOptions.add(new CliOption(TITLE, "server title name or client service name"));
         cliOptions.add(new CliOption(CONFIG_PACKAGE, "configuration package for generated code"));
         cliOptions.add(new CliOption(BASE_PACKAGE, "base package (invokerPackage) for generated code"));
-        cliOptions.add(CliOption.newBoolean(INTERFACE_ONLY, "Whether to generate only API interface stubs without the server files."));
-        cliOptions.add(CliOption.newBoolean(DELEGATE_PATTERN, "Whether to generate the server files using the delegate pattern"));
-        cliOptions.add(CliOption.newBoolean(SINGLE_CONTENT_TYPES, "Whether to select only one produces/consumes content-type by operation."));
-        cliOptions.add(CliOption.newBoolean(ASYNC, "use async Callable controllers"));
-        cliOptions.add(new CliOption(RESPONSE_WRAPPER, "wrap the responses in given type (Future,Callable,CompletableFuture,ListenableFuture,DeferredResult,HystrixCommand,RxObservable,RxSingle or fully qualified type)"));
         cliOptions.add(CliOption.newBoolean(USE_TAGS, "use tags for creating interface and controller classnames"));
         cliOptions.add(CliOption.newBoolean(USE_BEANVALIDATION, "Use BeanValidation API annotations"));
         cliOptions.add(CliOption.newBoolean(IMPLICIT_HEADERS, "Use of @ApiImplicitParams for headers."));
-        cliOptions.add(CliOption.newBoolean(SWAGGER_DOCKET_CONFIG, "Generate Micronaut Swagger Docket configuration class."));
         cliOptions.add(CliOption.newBoolean(USE_OPTIONAL,
                 "Use Optional container for optional parameters"));
 
@@ -153,26 +141,6 @@ public class MicronautCodegen extends AbstractJavaCodegen implements BeanValidat
             this.setBasePackage((String) additionalProperties.get(BASE_PACKAGE));
         }
 
-        if (additionalProperties.containsKey(INTERFACE_ONLY)) {
-            this.setInterfaceOnly(Boolean.valueOf(additionalProperties.get(INTERFACE_ONLY).toString()));
-        }
-
-        if (additionalProperties.containsKey(DELEGATE_PATTERN)) {
-            this.setDelegatePattern(Boolean.valueOf(additionalProperties.get(DELEGATE_PATTERN).toString()));
-        }
-
-        if (additionalProperties.containsKey(SINGLE_CONTENT_TYPES)) {
-            this.setSingleContentTypes(Boolean.valueOf(additionalProperties.get(SINGLE_CONTENT_TYPES).toString()));
-        }
-
-        if (additionalProperties.containsKey(ASYNC)) {
-            this.setAsync(Boolean.valueOf(additionalProperties.get(ASYNC).toString()));
-        }
-
-        if (additionalProperties.containsKey(RESPONSE_WRAPPER)) {
-            this.setResponseWrapper((String) additionalProperties.get(RESPONSE_WRAPPER));
-        }
-
         if (additionalProperties.containsKey(USE_TAGS)) {
             this.setUseTags(Boolean.valueOf(additionalProperties.get(USE_TAGS).toString()));
         }
@@ -193,68 +161,16 @@ public class MicronautCodegen extends AbstractJavaCodegen implements BeanValidat
             this.setImplicitHeaders(Boolean.valueOf(additionalProperties.get(IMPLICIT_HEADERS).toString()));
         }
 
-        if (additionalProperties.containsKey(SWAGGER_DOCKET_CONFIG)) {
-            this.setSwaggerDocketConfig(Boolean.valueOf(additionalProperties.get(SWAGGER_DOCKET_CONFIG).toString()));
-        }
-
         if (useOptional) {
             writePropertyBack(USE_OPTIONAL, useOptional);
         }
 
-        if (this.interfaceOnly && this.delegatePattern) {
-            this.delegateMethod = true;
-            additionalProperties.put("delegate-method", true);
-        }
-
         supportingFiles.add(new SupportingFile("pom.mustache", "", "pom.xml"));
         supportingFiles.add(new SupportingFile("README.mustache", "", "README.md"));
-
-        if (!this.interfaceOnly) {
-
-            supportingFiles.add(new SupportingFile("homeController.mustache",
-                    (sourceFolder + File.separator + configPackage).replace(".", File.separator), "HomeController.java"));
-            supportingFiles.add(new SupportingFile("mainApplication.mustache",
-                    (sourceFolder + File.separator + basePackage).replace(".", File.separator), "MainApplication.java"));
-            supportingFiles.add(new SupportingFile("RFC3339DateFormat.mustache",
-                    (sourceFolder + File.separator + basePackage).replace(".", File.separator), "RFC3339DateFormat.java"));
-            supportingFiles.add(new SupportingFile("application.mustache",
-                    ("src.main.resources").replace(".", File.separator), "application.yml"));
-            apiTemplateFiles.put("apiController.mustache", "Controller.java");
-            supportingFiles.add(new SupportingFile("apiException.mustache",
-                    (sourceFolder + File.separator + apiPackage).replace(".", File.separator), "ApiException.java"));
-            supportingFiles.add(new SupportingFile("apiResponseMessage.mustache",
-                    (sourceFolder + File.separator + apiPackage).replace(".", File.separator), "ApiResponseMessage.java"));
-            supportingFiles.add(new SupportingFile("notFoundException.mustache",
-                    (sourceFolder + File.separator + apiPackage).replace(".", File.separator), "NotFoundException.java"));
-        }
-
-        if (this.delegatePattern && !this.delegateMethod) {
-            additionalProperties.put("isDelegate", "true");
-            apiTemplateFiles.put("apiDelegate.mustache", "Delegate.java");
-        }
-
-        if (this.async) {
-            additionalProperties.put(RESPONSE_WRAPPER, "CompletableFuture");
-        }
-
-        switch (this.responseWrapper) {
-            case "Future":
-            case "Callable":
-            case "CompletableFuture":
-                additionalProperties.put(RESPONSE_WRAPPER, "java.util.concurrent" + this.responseWrapper);
-                break;
-            case "HystrixCommand":
-                additionalProperties.put(RESPONSE_WRAPPER, "com.netflix.hystrix.HystrixCommand");
-                break;
-            case "RxObservable":
-                additionalProperties.put(RESPONSE_WRAPPER, "rx.Observable");
-                break;
-            case "RxSingle":
-                additionalProperties.put(RESPONSE_WRAPPER, "rx.Single");
-                break;
-            default:
-                break;
-        }
+        supportingFiles.add(new SupportingFile("mvnw", "", "mvnw"));
+        supportingFiles.add(new SupportingFile("mvnw.cmd", "", "mvnw.cmd"));
+        supportingFiles.add(new SupportingFile("unsupportedOperationExceptionHandler.mustache",
+                (sourceFolder + File.separator + configPackage).replace(".", java.io.File.separator), "UnsupportedOperationExceptionHandler.java"));
 
         addHandlebarsLambdas(additionalProperties);
     }
@@ -302,11 +218,7 @@ public class MicronautCodegen extends AbstractJavaCodegen implements BeanValidat
             } else {
                 co.subresourceOperation = !co.path.isEmpty();
             }
-            List<CodegenOperation> opList = operations.get(basePath);
-            if (opList == null) {
-                opList = new ArrayList<CodegenOperation>();
-                operations.put(basePath, opList);
-            }
+            List<CodegenOperation> opList = operations.computeIfAbsent(basePath, k -> new ArrayList<>());
             opList.add(co);
             co.baseName = basePath;
         } else {
@@ -369,7 +281,7 @@ public class MicronautCodegen extends AbstractJavaCodegen implements BeanValidat
                         }
                         if (operation.getTags().size() > 0) {
                             String tag = operation.getTags().get(0);
-                            operation.setTags(Arrays.asList(tag));
+                            operation.setTags(singletonList(tag));
                         }
                         operation.addExtension("x-tags", tags);
                     }
@@ -380,9 +292,9 @@ public class MicronautCodegen extends AbstractJavaCodegen implements BeanValidat
 
     @Override
     public Map<String, Object> postProcessOperations(Map<String, Object> objs) {
-        Map<String, Object> operations = (Map<String, Object>) objs.get("operations");
+        @SuppressWarnings("unchecked") Map<String, Object> operations = (Map<String, Object>) objs.get("operations");
         if (operations != null) {
-            List<CodegenOperation> ops = (List<CodegenOperation>) operations.get("operation");
+            @SuppressWarnings("unchecked") List<CodegenOperation> ops = (List<CodegenOperation>) operations.get("operation");
             for (final CodegenOperation operation : ops) {
                 List<CodegenResponse> responses = operation.responses;
                 if (responses != null) {
@@ -437,26 +349,25 @@ public class MicronautCodegen extends AbstractJavaCodegen implements BeanValidat
      * @param returnType The return type that needs to be converted
      * @param dataTypeAssigner An object that will assign the data to the respective fields in the model.
      */
-    private void doDataTypeAssignment(String returnType, MicronautCodegen.DataTypeAssigner dataTypeAssigner) {
-        final String rt = returnType;
-        if (rt == null) {
+    private void doDataTypeAssignment(final String returnType, MicronautCodegen.DataTypeAssigner dataTypeAssigner) {
+        if (returnType == null) {
             dataTypeAssigner.setReturnType("Void");
-        } else if (rt.startsWith("List")) {
-            int end = rt.lastIndexOf(">");
+        } else if (returnType.startsWith("List")) {
+            int end = returnType.lastIndexOf(">");
             if (end > 0) {
-                dataTypeAssigner.setReturnType(rt.substring("List<".length(), end).trim());
+                dataTypeAssigner.setReturnType(returnType.substring("List<".length(), end).trim());
                 dataTypeAssigner.setReturnContainer("List");
             }
-        } else if (rt.startsWith("Map")) {
-            int end = rt.lastIndexOf(">");
+        } else if (returnType.startsWith("Map")) {
+            int end = returnType.lastIndexOf(">");
             if (end > 0) {
-                dataTypeAssigner.setReturnType(rt.substring("Map<".length(), end).split(",")[1].trim());
+                dataTypeAssigner.setReturnType(returnType.substring("Map<".length(), end).split(",")[1].trim());
                 dataTypeAssigner.setReturnContainer("Map");
             }
-        } else if (rt.startsWith("Set")) {
-            int end = rt.lastIndexOf(">");
+        } else if (returnType.startsWith("Set")) {
+            int end = returnType.lastIndexOf(">");
             if (end > 0) {
-                dataTypeAssigner.setReturnType(rt.substring("Set<".length(), end).trim());
+                dataTypeAssigner.setReturnType(returnType.substring("Set<".length(), end).trim());
                 dataTypeAssigner.setReturnContainer("Set");
             }
         }
@@ -486,8 +397,7 @@ public class MicronautCodegen extends AbstractJavaCodegen implements BeanValidat
         if(contents == null || contents.isEmpty()){
             return;
         }
-        for(int index = 0; index < contents.size(); index++) {
-            final CodegenContent codegenContent = contents.get(index);
+        for (final CodegenContent codegenContent : contents) {
             final List<CodegenParameter> parameters = codegenContent.getParameters();
             if (parameters == null || parameters.isEmpty()) {
                 continue;
@@ -497,13 +407,13 @@ public class MicronautCodegen extends AbstractJavaCodegen implements BeanValidat
                     .collect(Collectors.toList());
             parameters.clear();
             parameters.addAll(filteredParameters);
-            parameters.get(parameters.size()-1).getVendorExtensions().put(CodegenConstants.HAS_MORE_EXT_NAME, Boolean.FALSE);
+            parameters.get(parameters.size() - 1).getVendorExtensions().put(CodegenConstants.HAS_MORE_EXT_NAME, Boolean.FALSE);
         }
     }
 
     @Override
     public Map<String, Object> postProcessSupportingFileData(Map<String, Object> objs) {
-        List<CodegenSecurity> authMethods = (List<CodegenSecurity>) objs.get("authMethods");
+        @SuppressWarnings("unchecked") List<CodegenSecurity> authMethods = (List<CodegenSecurity>) objs.get("authMethods");
         if (authMethods != null) {
             for (CodegenSecurity authMethod : authMethods) {
                 authMethod.name = camelize(sanitizeName(authMethod.name), true);
@@ -530,40 +440,29 @@ public class MicronautCodegen extends AbstractJavaCodegen implements BeanValidat
         return getterAndSetterCapitalize(name);
     }
 
+    @SuppressWarnings("WeakerAccess")
     public void setTitle(String title) {
         this.title = title;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public void setConfigPackage(String configPackage) {
         this.configPackage = configPackage;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public void setBasePackage(String configPackage) {
         this.basePackage = configPackage;
     }
 
-    public void setInterfaceOnly(boolean interfaceOnly) { this.interfaceOnly = interfaceOnly; }
-
-    public void setDelegatePattern(boolean delegatePattern) { this.delegatePattern = delegatePattern; }
-
-    public void setSingleContentTypes(boolean singleContentTypes) {
-        this.singleContentTypes = singleContentTypes;
-    }
-
-    public void setAsync(boolean async) { this.async = async; }
-
-    public void setResponseWrapper(String responseWrapper) { this.responseWrapper = responseWrapper; }
-
+    @SuppressWarnings("WeakerAccess")
     public void setUseTags(boolean useTags) {
         this.useTags = useTags;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public void setImplicitHeaders(boolean implicitHeaders) {
         this.implicitHeaders = implicitHeaders;
-    }
-
-    public void setSwaggerDocketConfig(boolean swaggerDocketConfig) {
-        this.swaggerDocketConfig = swaggerDocketConfig;
     }
 
     @Override
@@ -600,16 +499,16 @@ public class MicronautCodegen extends AbstractJavaCodegen implements BeanValidat
         objs = super.postProcessModelsEnum(objs);
 
         //Add imports for Jackson
-        List<Map<String, String>> imports = (List<Map<String, String>>)objs.get("imports");
-        List<Object> models = (List<Object>) objs.get("models");
+        @SuppressWarnings("unchecked") List<Map<String, String>> imports = (List<Map<String, String>>)objs.get("imports");
+        @SuppressWarnings("unchecked") List<Object> models = (List<Object>) objs.get("models");
         for (Object _mo : models) {
-            Map<String, Object> mo = (Map<String, Object>) _mo;
+            @SuppressWarnings("unchecked") Map<String, Object> mo = (Map<String, Object>) _mo;
             CodegenModel cm = (CodegenModel) mo.get("model");
             // for enum model
             boolean isEnum = getBooleanValue(cm, IS_ENUM_EXT_NAME);
             if (Boolean.TRUE.equals(isEnum) && cm.allowableValues != null) {
                 cm.imports.add(importMapping.get("JsonValue"));
-                Map<String, String> item = new HashMap<String, String>();
+                Map<String, String> item = new HashMap<>();
                 item.put("import", importMapping.get("JsonValue"));
                 imports.add(item);
             }

@@ -3,40 +3,34 @@ package {{package}};
 {{#imports}}import {{import}};
 {{/imports}}
 
-import java.util.*;
+import io.micronaut.http.HttpResponse;
+import io.micronaut.http.HttpStatus;
+import io.micronaut.test.annotation.MicronautTest;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
+import javax.inject.Inject;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class {{classname}}ControllerIntegrationTest {
+@MicronautTest
+class {{classname}}ControllerTest {
 
-    @Autowired
+    @Inject
     private {{classname}} api;
 
     {{#operations}}
     {{#operation}}
     {{#contents}}
     @Test
-    public void {{operationId}}Test() throws Exception {
+    void {{operationId}}Test() {
         {{#parameters}}
-        {{^isFile}}
         {{{dataType}}} {{paramName}} = {{{example}}};
-        {{/isFile}}
-        {{#isFile}}
-        org.springframework.web.multipart.MultipartFile {{paramName}} = null;
-        {{/isFile}}
         {{/parameters}}
-        ResponseEntity<{{>returnTypes}}> responseEntity = api.{{operationId}}({{#parameters}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/parameters}});
-        assertEquals(HttpStatus.NOT_IMPLEMENTED, responseEntity.getStatusCode());
+        try {
+            api.{{operationId}}({{#parameters}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/parameters}}).blockingGet();
+        } catch (UnsupportedOperationException e) {
+            assumeTrue(false, "API is not yet implemented");
+        }
     }
 
     {{/contents}}
