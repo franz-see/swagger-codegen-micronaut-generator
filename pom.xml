@@ -50,6 +50,24 @@
       <artifactId>swagger-codegen-generators</artifactId>
       <version>1.0.10</version>
     </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>5.5.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>5.5.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.swagger.codegen.v3</groupId>
+      <artifactId>swagger-codegen-cli</artifactId>
+      <version>3.0.10</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
