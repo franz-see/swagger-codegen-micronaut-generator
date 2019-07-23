@@ -13,13 +13,13 @@ First, Download the jars
 curl -O https://repo1.maven.org/maven2/io/swagger/codegen/v3/swagger-codegen-cli/3.0.10/swagger-codegen-cli-3.0.10.jar
 
 # download micronaut generator
-curl -O https://dl.bintray.com/franz-see/maven-repo/ph/net/see/swagger-codegen-micronaut-generator/1.0.0/swagger-codegen-micronaut-generator-1.0.0.jar
+curl -O https://dl.bintray.com/franz-see/maven-repo/ph/net/see/swagger-codegen-micronaut-generator/1.0.1/swagger-codegen-micronaut-generator-1.0.1.jar
 ```
 
 Next, use both jars to generate a micronaut project based on your swagger.yaml
 
 ```
-java -cp swagger-codegen-micronaut-generator-1.0.0.jar:swagger-codegen-cli-3.0.10.jar \
+java -cp swagger-codegen-micronaut-generator-1.0.1.jar:swagger-codegen-cli-3.0.10.jar \
   io.swagger.codegen.v3.cli.SwaggerCodegen \
   generate \
   -l ph.net.see.swaggercodegenmicronautgenerator.MicronautCodegen \
