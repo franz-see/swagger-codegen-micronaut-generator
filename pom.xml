@@ -4,7 +4,7 @@
 
   <groupId>ph.net.see</groupId>
   <artifactId>swagger-codegen-micronaut-generator</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.1</version>
 
   <name>Swagger Codegen Micronaut Generator</name>
   <description>Swagger Codegen template to generate Micronaut server code</description>
@@ -33,7 +33,7 @@
     <connection>scm:git:https://github.com/franz-see/swagger-codegen-micronaut-generator.git</connection>
     <developerConnection>scm:git:git@github.com:franz-see/swagger-codegen-micronaut-generator.git</developerConnection>
     <url>https://github.com/franz-see/swagger-codegen-micronaut-generator</url>
-    <tag>HEAD</tag>
+    <tag>v1.0.1</tag>
   </scm>
 
   <distributionManagement>
