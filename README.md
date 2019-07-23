@@ -33,3 +33,7 @@ This will read your swagger/openapi configuration `/path/to/your/swagger.yaml` a
 The project it will generate will contain dtos for your API, config files, and the actual Api intefaces themselves. By default, these Api interfaces throw `UnsupportedOperationException`. 
 
 The next step would be to implement those Api interfaces with your `@Controller` classes, and start implementing those methods with actual logic. 
+
+# Appendix
+
+ * This code base has currently been donated into swagger-codegen-generators. If it does get merged to that project, then you should be able to create a micronaut based java application diretly from core swagger libraries. https://github.com/swagger-api/swagger-codegen-generators/issues/429
