@@ -30,15 +30,18 @@ import static java.util.Collections.singletonList;
 
 public class MicronautCodegen extends AbstractJavaCodegen implements BeanValidationFeatures, OptionalFeatures {
 
+    public static final String CONTROLLER_PREFIX = "Controller.java";
     private static Logger LOGGER = LoggerFactory.getLogger(MicronautCodegen.class);
     private static final String TITLE = "title";
     private static final String CONFIG_PACKAGE = "configPackage";
+    private static final String CONTROLLER_PACKAGE = "controllerPackage";
     private static final String BASE_PACKAGE = "basePackage";
     private static final String USE_TAGS = "useTags";
     private static final String IMPLICIT_HEADERS = "implicitHeaders";
 
     private String title = "swagger-petstore";
     private String configPackage = "io.swagger.configuration";
+    private String controllerPackage = "io.swagger.controller";
     private String basePackage = "io.swagger";
     private boolean useTags = false;
     private boolean useBeanValidation = true;
@@ -59,6 +62,7 @@ public class MicronautCodegen extends AbstractJavaCodegen implements BeanValidat
         artifactId = "swagger-micronaut";
 
         additionalProperties.put(CONFIG_PACKAGE, configPackage);
+        additionalProperties.put(CONTROLLER_PACKAGE, controllerPackage);
         additionalProperties.put(BASE_PACKAGE, basePackage);
 
         // micronaut uses the jackson lib
@@ -66,6 +70,7 @@ public class MicronautCodegen extends AbstractJavaCodegen implements BeanValidat
 
         cliOptions.add(new CliOption(TITLE, "server title name or client service name"));
         cliOptions.add(new CliOption(CONFIG_PACKAGE, "configuration package for generated code"));
+        cliOptions.add(new CliOption(CONTROLLER_PACKAGE, "controller package for generated code"));
         cliOptions.add(new CliOption(BASE_PACKAGE, "base package (invokerPackage) for generated code"));
         cliOptions.add(CliOption.newBoolean(USE_TAGS, "use tags for creating interface and controller classnames"));
         cliOptions.add(CliOption.newBoolean(USE_BEANVALIDATION, "Use BeanValidation API annotations"));
@@ -137,6 +142,10 @@ public class MicronautCodegen extends AbstractJavaCodegen implements BeanValidat
             this.setConfigPackage((String) additionalProperties.get(CONFIG_PACKAGE));
         }
 
+        if (additionalProperties.containsKey(CONTROLLER_PACKAGE)) {
+            this.setControllerPackage((String) additionalProperties.get(CONTROLLER_PACKAGE));
+        }
+
         if (additionalProperties.containsKey(BASE_PACKAGE)) {
             this.setBasePackage((String) additionalProperties.get(BASE_PACKAGE));
         }
@@ -172,6 +181,10 @@ public class MicronautCodegen extends AbstractJavaCodegen implements BeanValidat
         supportingFiles.add(new SupportingFile("unsupportedOperationExceptionHandler.mustache",
                 (sourceFolder + File.separator + configPackage).replace(".", java.io.File.separator), "UnsupportedOperationExceptionHandler.java"));
 
+        // implementation
+        supportingFiles.add(new SupportingFile("mainApplication.mustache", packageToPath(basePackage), "MainApplication.java"));
+        apiTemplateFiles.put("apiController.mustache", "Controller.java");
+
         addHandlebarsLambdas(additionalProperties);
     }
 
@@ -199,6 +212,29 @@ public class MicronautCodegen extends AbstractJavaCodegen implements BeanValidat
         } else {
             objs.put("lambda", lambdas);
         }
+    }
+
+    @Override
+    public String apiFilename(String templateName, String tag) {
+        if ("apiController.mustache".equals(templateName)) {
+            String suffix = apiTemplateFiles().get(templateName);
+            return controllerFileFolder() + '/' + toApiFilename(tag) + suffix;
+        } else {
+            return super.apiFilename(templateName, tag);
+        }
+    }
+
+    private String controllerFileFolder() {
+        return outputFolder + "/" + packageToPath(controllerPackage);
+    }
+
+    private String packageToPath(String packageReference) {
+        return sourceFolder + "/" + packageReference.replace('.', '/');
+    }
+
+    @Override
+    public boolean shouldOverwrite(String filename) {
+        return !filename.endsWith(CONTROLLER_PREFIX) && super.shouldOverwrite(filename);
     }
 
     @Override
@@ -448,6 +484,11 @@ public class MicronautCodegen extends AbstractJavaCodegen implements BeanValidat
     @SuppressWarnings("WeakerAccess")
     public void setConfigPackage(String configPackage) {
         this.configPackage = configPackage;
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public void setControllerPackage(String controllerPackage) {
+        this.controllerPackage = controllerPackage;
     }
 
     @SuppressWarnings("WeakerAccess")
