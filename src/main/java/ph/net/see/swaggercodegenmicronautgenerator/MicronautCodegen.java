@@ -30,14 +30,16 @@ import static java.util.Collections.singletonList;
 
 public class MicronautCodegen extends AbstractJavaCodegen implements BeanValidationFeatures, OptionalFeatures {
 
-    public static final String CONTROLLER_PREFIX = "Controller.java";
     private static Logger LOGGER = LoggerFactory.getLogger(MicronautCodegen.class);
+
     private static final String TITLE = "title";
     private static final String CONFIG_PACKAGE = "configPackage";
     private static final String CONTROLLER_PACKAGE = "controllerPackage";
     private static final String BASE_PACKAGE = "basePackage";
     private static final String USE_TAGS = "useTags";
     private static final String IMPLICIT_HEADERS = "implicitHeaders";
+
+    private static final String CONTROLLER_PREFIX = "Controller.java";
 
     private String title = "swagger-petstore";
     private String configPackage = "io.swagger.configuration";
