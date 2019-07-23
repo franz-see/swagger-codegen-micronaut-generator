@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/franz-see/swagger-codegen-micronaut-generator.svg?branch=master)](https://travis-ci.org/franz-see/swagger-codegen-micronaut-generator) 
-[ ![Download](https://api.bintray.com/packages/franz-see/maven-repo/swagger-codegen-micronaut-generator/images/download.svg) ](https://bintray.com/franz-see/maven-repo/swagger-codegen-micronaut-generator/_latestVersion)
+[![codecov](https://codecov.io/gh/franz-see/swagger-codegen-micronaut-generator/branch/master/graph/badge.svg)](https://codecov.io/gh/franz-see/swagger-codegen-micronaut-generator)
+[![Download](https://api.bintray.com/packages/franz-see/maven-repo/swagger-codegen-micronaut-generator/images/download.svg) ](https://bintray.com/franz-see/maven-repo/swagger-codegen-micronaut-generator/_latestVersion)
 
 # swagger-codegen-micronaut-generator
 Template to Generate Micronaut-based server side java application from a swagger/openapi specification
