@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import io.swagger.codegen.v3.*;
 import io.swagger.codegen.v3.generators.features.BeanValidationFeatures;
 import io.swagger.codegen.v3.generators.features.OptionalFeatures;
-import io.swagger.codegen.v3.generators.handlebars.lambda.*;
 import io.swagger.codegen.v3.generators.java.AbstractJavaCodegen;
 import io.swagger.codegen.v3.utils.URLPathUtil;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -15,8 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ph.net.see.swaggercodegenmicronautgenerator.lambda.CapitaliseLambda;
-import ph.net.see.swaggercodegenmicronautgenerator.lambda.EscapeDoubleQuotesLambda;
-import ph.net.see.swaggercodegenmicronautgenerator.lambda.RemoveLineBreakLambda;
 
 import java.io.File;
 import java.net.URL;
@@ -192,28 +189,9 @@ public class MicronautCodegen extends AbstractJavaCodegen implements BeanValidat
 
     private void addHandlebarsLambdas(Map<String, Object> objs) {
         Map<String, Lambda> lambdas = new ImmutableMap.Builder<String, Lambda>()
-                .put("lowercase", new LowercaseLambda().generator(this))
-                .put("uppercase", new UppercaseLambda())
-                .put("titlecase", new TitlecaseLambda())
-                .put("camelcase", new CamelCaseLambda().generator(this))
-                .put("camelcase_param", new CamelCaseLambda().generator(this).escapeAsParamName(true))
-                .put("indented", new IndentedLambda())
-                .put("indented_8", new IndentedLambda(8, " "))
-                .put("indented_12", new IndentedLambda(12, " "))
-                .put("indented_16", new IndentedLambda(16, " "))
                 .put("capitalise", new CapitaliseLambda())
-                .put("escapeDoubleQuote", new EscapeDoubleQuotesLambda())
-                .put("removeLineBreak", new RemoveLineBreakLambda())
                 .build();
-
-        if (objs.containsKey("lambda")) {
-            LOGGER.warn("An property named 'lambda' already exists. Mustache lambdas renamed from 'lambda' to '_lambda'. " +
-                    "You'll likely need to use a custom template, " +
-                    "see https://github.com/swagger-api/swagger-codegen#modifying-the-client-library-format. ");
-            objs.put("_lambda", lambdas);
-        } else {
-            objs.put("lambda", lambdas);
-        }
+        objs.put("lambda", lambdas);
     }
 
     @Override
